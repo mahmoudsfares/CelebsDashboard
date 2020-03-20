@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <dimen name="tv_login_height">50dp</dimen>
+    <dimen name="tv_login_width">170dp</dimen>
+    <dimen name="welcome_height">30dp</dimen>
+    <dimen name="upper_toolbar_height">80dp</dimen>
+    <dimen name="welcome_textSize">20sp</dimen>
+    <dimen name="contact_dimens">70dp</dimen>
+    <dimen name="contact_margins">16dp</dimen>
+    <dimen name="contact_textSize">20sp</dimen>
+    <dimen name="views_separator_margin">8dp</dimen>
+    <dimen name="padding">8dp</dimen>
+    <dimen name="tv_signup_textSize">20sp</dimen>
+</resources>

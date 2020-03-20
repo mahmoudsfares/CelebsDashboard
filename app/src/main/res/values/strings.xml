@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">CelebsDashboard</string>
+    <string name="login_username_hint">Username</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_button">Login</string>
+    <string name="save_button">Save</string>
+    <string name="signup_tv"><u>Don\'t have an account? Sign up.</u></string>
+    <string name="wrong_login_entry">Wrong username or password, please try again</string>
+    <string name="no_results">No available data</string>
+</resources>
