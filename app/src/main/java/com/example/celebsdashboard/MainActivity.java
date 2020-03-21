@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.text.InputType;
@@ -17,6 +18,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.celebsdashboard.data.DatabaseClient;
 import com.example.celebsdashboard.model.User;
 
 import java.util.List;
@@ -92,42 +94,54 @@ public class MainActivity extends AppCompatActivity {
         Button login = findViewById(R.id.login_button);
         login.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                if(checkEntryData(mLoginUsernameET,mLoginPasswordET)){
-                    String welcome = mLoginUsernameET.getText().toString().trim();
-                    Intent i = new Intent(MainActivity.this, DashboardActivity.class);
-                    i.putExtra("username",welcome);
-
-                    startActivity(i);
-                }
-                else{
-                    Toast.makeText(MainActivity.this, R.string.wrong_login_entry, Toast.LENGTH_SHORT).show();
-                }
+                checkEntryData(mLoginUsernameET,mLoginPasswordET);
             }
         });
     }
 
+        // checks the username and password
+        private void checkEntryData(EditText usernameET, EditText passwordET){
 
-    // checks the username and password
-    private boolean checkEntryData(EditText usernameET, EditText passwordET){
+            String loginUsername = usernameET.getText().toString().trim();
+            String loginPassword = passwordET.getText().toString();
+            getUser(loginUsername, loginPassword);
+        }
 
-        String loginUsername = usernameET.getText().toString().trim();
-        String loginPassword = passwordET.getText().toString();
-        boolean correctUserdata = false;
-        SignupActivity signupActivity = new SignupActivity();
-        List<User> users = signupActivity.loadData(this);
-        if(users == null)
-            return false;
+        private void getUser(final String loginUsername, final String loginPassword) {
+            class GetUser extends AsyncTask<Void, Void, List<User>> {
 
-        else{
-            for(User s: users){
-                if(loginUsername.equals(s.getmUsername()) && loginPassword.equals((s.getmPassword()))){
-                    correctUserdata = true;
-                    break;
+                @Override
+                protected List<User> doInBackground(Void... voids) {
+                    List<User> loggedUser = DatabaseClient
+                            .getInstance(getApplicationContext())
+                            .getAppDatabase()
+                            .userDao()
+                            .get(loginUsername, loginPassword);
+                    return loggedUser;
+                }
+
+                @Override
+                protected void onPostExecute(List<User> user) {
+                    super.onPostExecute(user);
+                    if(user.size() > 0)
+                        userFound();
+                    else
+                        noSuchUserFound();
                 }
             }
-        }
-        return (correctUserdata);
-    }
 
+        GetUser gu = new GetUser();
+        gu.execute();
+        }
+
+        private void userFound(){
+            String welcome = mLoginUsernameET.getText().toString().trim();
+            Intent i = new Intent(MainActivity.this, DashboardActivity.class);
+            i.putExtra("username",welcome);
+            startActivity(i);
+        }
+
+        private void noSuchUserFound(){
+            Toast.makeText(MainActivity.this, R.string.wrong_login_entry, Toast.LENGTH_SHORT).show();
+        }
 }

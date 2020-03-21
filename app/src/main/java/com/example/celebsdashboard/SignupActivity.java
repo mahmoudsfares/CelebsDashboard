@@ -3,7 +3,9 @@ package com.example.celebsdashboard;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.celebsdashboard.data.DatabaseClient;
 import com.example.celebsdashboard.model.User;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -21,7 +24,6 @@ import java.util.ArrayList;
 
 public class SignupActivity extends AppCompatActivity {
 
-    ArrayList<User> users;
     private EditText usernameET;
     private EditText passwordET;
     private Button save;
@@ -31,7 +33,6 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        users = loadData(this);
         usernameET = findViewById(R.id.signup_username_et);
         passwordET = findViewById(R.id.signup_password_et);
         passwordET.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -42,34 +43,53 @@ public class SignupActivity extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String newUsername = usernameET.getText().toString().trim();
-                String newPassword = passwordET.getText().toString();
-                saveData(newUsername, newPassword);
+                saveData();
             }
         });
     }
 
-    private void saveData(String username, String password) {
+    private void saveData() {
+        final String sUsername = usernameET.getText().toString().trim();
+        final String sPassword = passwordET.getText().toString();
 
-        if(users == null)
-            users = new ArrayList<>();
-        users.add(new User(username, password));
-        SharedPreferences sharedPreferences = getSharedPreferences("User", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(users);
-        editor.putString("userList", json);
-        editor.apply();
-        Toast.makeText(this,"Saved", Toast.LENGTH_SHORT).show();
-        finish();
-    }
+        if (sUsername.isEmpty()) {
+            usernameET.setError("Username required");
+            usernameET.requestFocus();
+            return;
+        }
 
-    public ArrayList<User> loadData(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("User", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("userList", null);
-        Type type = new TypeToken<ArrayList<User>>() {}.getType();
-        users = gson.fromJson(json, type);
-        return users;
+        if (sPassword.isEmpty()) {
+            passwordET.setError("Password required");
+            passwordET.requestFocus();
+            return;
+        }
+
+        class SaveUser extends AsyncTask<Void, Void, Void> {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+
+                //creating a task
+                User user = new User(sUsername, sPassword);
+
+                //adding to database
+                DatabaseClient.getInstance(getApplicationContext()).getAppDatabase()
+                        .userDao()
+                        .insert(user);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                finish();
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG).show();
+            }
+        }
+        SaveUser su = new SaveUser();
+        su.execute();
     }
 }
+
+

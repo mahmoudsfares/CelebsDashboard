@@ -1,37 +1,56 @@
 package com.example.celebsdashboard.model;
 
-
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
-public class User {
+import java.io.Serializable;
 
-    private String mUsername;
-    private String mPassword;
+@Entity(tableName = "user")
+public class User implements Serializable {
 
-    public User(String mUsername, String mPassword) {
-        this.mUsername = mUsername;
-        this.mPassword = mPassword;
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
+    @ColumnInfo(name = "username")
+    private String username;
+
+    @ColumnInfo(name = "password")
+    private String password;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
-    public String getmUsername() {
-        return mUsername;
+    public int getId() {
+        return id;
     }
 
-    public void setmUsername(String mUsername) {
-        this.mUsername = mUsername;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getmPassword() {
-        return mPassword;
+    public String getUsername() {
+        return username;
     }
 
-    public void setmPassword(String mPassword) {
-        this.mPassword = mPassword;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "Username: " + getmUsername() + ", Password: " + getmPassword();
+        return "Username: " + getUsername() + ", Password: " + getPassword();
     }
 }
